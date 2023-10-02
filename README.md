@@ -4,7 +4,7 @@ Support Apple Silicon only.
 
 ```
 $ cd ./Effect/MSL/
-$ ./MSL.sh Bypass
+$ ./setup.sh Bypass
 ```
 
 ##### build
