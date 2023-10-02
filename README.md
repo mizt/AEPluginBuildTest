@@ -1,3 +1,5 @@
+Support apple silicon only.
+
 ##### setup
 
 ```
