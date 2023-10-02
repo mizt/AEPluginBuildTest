@@ -4,19 +4,24 @@
 cd "$(dirname "$0")"
 cd ./
 
+set -eu
+
+PLUGIN="PLUGIN"
+echo ${PLUGIN}
+
 mkdir -p Invert.plugin/Contents/{MacOS,Resources}
 
-clang++ -std=c++20 -Wc++20-extensions -bundle -dependency_info -fobjc-arc -O3 -I../../Headers -I../../Util -framework Cocoa -framework Metal -framework Quartz -framework CoreMedia ./Invert.mm -o ./Invert
+clang++ -std=c++20 -Wc++20-extensions -bundle -dependency_info -fobjc-arc -O3 -I../../Headers -I../../Util -I./ -framework Cocoa -framework Metal -framework Quartz -framework CoreMedia ../MSL/main.mm -o ./${PLUGIN}.plugin/Contents/MacOS/${PLUGIN}
 
-Rez -o ./InvertPiPL.rsrc -define __MACH__ -arch arm64 -i ../../Headers -i ../../Resources ./InvertPiPL.r
-ResMerger -dstIs DF ./InvertPiPL.rsrc -o ./Invert.rsrc
+Rez -o ./${PLUGIN}PiPL.rsrc -define __MACH__ -arch arm64 -i ../../Headers -i ../../Resources ./${PLUGIN}PiPL.r
+ResMerger -dstIs DF ./${PLUGIN}PiPL.rsrc -o ./${PLUGIN}.plugin/Contents/Resources/${PLUGIN}.rsrc
+rm ./${PLUGIN}PiPL.rsrc
 
-cp ./Info.plist ./Invert.plugin/Contents/
-cp ./PkgInfo ./Invert.plugin/Contents/
-cp ./Invert.rsrc ./Invert.plugin/Contents/Resources/Invert.rsrc
-cp ./shaders/Invert.metallib ./Invert.plugin/Contents/Resources/Invert.metallib
+cp ./${PLUGIN}.plist ./${PLUGIN}.plugin/Contents/
+cp ../MSL/PkgInfo ./${PLUGIN}.plugin/Contents/
+cp ./${PLUGIN}.metallib ./${PLUGIN}.plugin/Contents/Resources/${PLUGIN}.metallib
 
-cp ./Invert ./Invert.plugin/Contents/MacOS/Invert
+codesign --force --options runtime --deep --entitlements "../MSL/entitlements.plist" --sign "Developer ID Application" --timestamp --verbose ${PLUGIN}.plugin
 
-codesign --force --options runtime --deep --entitlements "entitlements.plist" --sign "Developer ID Application" --timestamp --verbose Invert.plugin
+echo "** BUILD SUCCEEDED **"
 ```
