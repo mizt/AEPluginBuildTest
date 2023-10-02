@@ -7,7 +7,7 @@ PLUGIN="PLUGIN"
 echo ${PLUGIN}
 
 xcrun -sdk macosx metal -c ${PLUGIN}.metal -o ${PLUGIN}.air
-xcrun -sdk macosx metallib ${PLUGIN}.air -o ${PLUGIN}.metallib; 
+xcrun -sdk macosx metallib ${PLUGIN}.air -o ${PLUGIN}.metallib
 rm ${PLUGIN}.air
 
 mkdir -p ${PLUGIN}.plugin/Contents/{MacOS,Resources}
