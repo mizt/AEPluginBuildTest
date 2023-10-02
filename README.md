@@ -1,4 +1,4 @@
-Support apple silicon only.
+Support Apple Silicon only.
 
 ##### setup
 
