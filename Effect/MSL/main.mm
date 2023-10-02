@@ -16,6 +16,9 @@ namespace FileManager {
     NSString *resource(NSString *identifier, NSString *filename) {
         return resource(identifier,[filename stringByDeletingPathExtension],[filename pathExtension]);
     }
+    NSURL *URL(NSString *path) {
+        return [NSURL fileURLWithPath:path];
+    }
 };
 
 typedef unsigned int MESH_INDICES_TYPE;
@@ -158,7 +161,7 @@ class MetalLayer {
     
         bool init(id<MTLDevice> device, int width, int height, NSString *shader) {
             NSError *error = nil;
-            this->_library = [device newLibraryWithFile:shader error:&error];
+            this->_library = [device newLibraryWithURL:FileManager::URL(shader) error:&error];
             if(this->_library&&error==nil) {
                 if(this->setupShader(device)) return false;
                 this->_isInit = this->setup(device,width,height);
@@ -190,16 +193,16 @@ class MetalLayer {
             depthDesc.depthWriteEnabled = YES;
             this->_depthState = [device newDepthStencilStateWithDescriptor:depthDesc];
             
-            this->_verticesBuffer = [device newBufferWithBytes:this->_data->vertices length:this->_data->VERTICES_SIZE*sizeof(float) options:MTLResourceOptionCPUCacheModeDefault];
+            this->_verticesBuffer = [device newBufferWithBytes:this->_data->vertices length:this->_data->VERTICES_SIZE*sizeof(float) options:MTLResourceCPUCacheModeDefaultCache];
             if(!this->_verticesBuffer) return false;
             
-            this->_indicesBuffer = [device newBufferWithBytes:this->_data->indices length:this->_data->INDICES_SIZE*sizeof(this->_data->INDICES_TYPE) options:MTLResourceOptionCPUCacheModeDefault];
+            this->_indicesBuffer = [device newBufferWithBytes:this->_data->indices length:this->_data->INDICES_SIZE*sizeof(this->_data->INDICES_TYPE) options:MTLResourceCPUCacheModeDefaultCache];
             if(!this->_indicesBuffer) return false;
            
-            this->_texcoordBuffer = [device newBufferWithBytes:this->_data->texcoord length:this->_data->TEXCOORD_SIZE*sizeof(float) options:MTLResourceOptionCPUCacheModeDefault];
+            this->_texcoordBuffer = [device newBufferWithBytes:this->_data->texcoord length:this->_data->TEXCOORD_SIZE*sizeof(float) options:MTLResourceCPUCacheModeDefaultCache];
             if(!this->_texcoordBuffer) return false;
                                     
-            this->_argumentEncoderBuffer = [device newBufferWithLength:sizeof(float)*[this->_argumentEncoder encodedLength] options:MTLResourceOptionCPUCacheModeDefault];
+            this->_argumentEncoderBuffer = [device newBufferWithLength:sizeof(float)*[this->_argumentEncoder encodedLength] options:MTLResourceCPUCacheModeDefaultCache];
 
             [this->_argumentEncoder setArgumentBuffer:this->_argumentEncoderBuffer offset:0];
             [this->_argumentEncoder setTexture:this->_texture atIndex:0];
@@ -230,7 +233,7 @@ class MetalLayer {
             [this->_renderEncoder setVertexBuffer:this->_verticesBuffer offset:0 atIndex:0];
             [this->_renderEncoder setVertexBuffer:this->_texcoordBuffer offset:0 atIndex:1];
 
-            [this->_renderEncoder useResource:this->_texture usage:MTLResourceUsageSample];
+            [this->_renderEncoder useResource:this->_texture usage:MTLResourceUsageRead stages:MTLRenderStageFragment];
             [this->_renderEncoder setFragmentBuffer:this->_argumentEncoderBuffer offset:0 atIndex:0];
 
             if(this->_data->INDICES_TYPE==sizeof(unsigned short)) {
