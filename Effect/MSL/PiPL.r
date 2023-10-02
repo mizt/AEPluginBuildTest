@@ -11,7 +11,7 @@ resource 'PiPL' (16000) {
 			"Plugin"
 		},
 		Category {
-			"mizt"
+			"MSL"
 		},
 		CodeMacARM64 {"EffectMain"},
 		AE_PiPL_Version {

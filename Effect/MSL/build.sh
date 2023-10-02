@@ -6,7 +6,11 @@ set -eu
 PLUGIN="PLUGIN"
 echo ${PLUGIN}
 
-mkdir -p Invert.plugin/Contents/{MacOS,Resources}
+xcrun -sdk macosx metal -c ${PLUGIN}.metal -o ${PLUGIN}.air
+xcrun -sdk macosx metallib ${PLUGIN}.air -o ${PLUGIN}.metallib; 
+rm ${PLUGIN}.air
+
+mkdir -p ${PLUGIN}.plugin/Contents/{MacOS,Resources}
 
 clang++ -std=c++20 -Wc++20-extensions -bundle -dependency_info -fobjc-arc -O3 -I../../Headers -I../../Util -I./ -framework Cocoa -framework Metal -framework Quartz -framework CoreMedia ../MSL/main.mm -o ./${PLUGIN}.plugin/Contents/MacOS/${PLUGIN}
 
@@ -14,7 +18,7 @@ Rez -o ./${PLUGIN}PiPL.rsrc -define __MACH__ -arch arm64 -i ../../Headers -i ../
 ResMerger -dstIs DF ./${PLUGIN}PiPL.rsrc -o ./${PLUGIN}.plugin/Contents/Resources/${PLUGIN}.rsrc
 rm ./${PLUGIN}PiPL.rsrc
 
-cp ./${PLUGIN}.plist ./${PLUGIN}.plugin/Contents/
+cp ./Info.plist ./${PLUGIN}.plugin/Contents/
 cp ../MSL/PkgInfo ./${PLUGIN}.plugin/Contents/
 cp ./${PLUGIN}.metallib ./${PLUGIN}.plugin/Contents/Resources/${PLUGIN}.metallib
 
