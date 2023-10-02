@@ -214,7 +214,6 @@ class MetalLayer {
             colorAttachment.texture = this->_metalDrawable.texture;
             colorAttachment.loadAction  = MTLLoadActionClear;
             
-            // clear
             colorAttachment.clearColor  = MTLClearColorMake(0.0f,0.0f,0.0f,0.0f);
             colorAttachment.storeAction = MTLStoreActionStore;
             
@@ -386,7 +385,7 @@ static PF_Err Render(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *para
             
             id<MTLCommandQueue> queue = MFR::queues[tid];
             CAMetalLayer *layer = MFR::layers[tid];
-            layer.drawableSize = CGSizeMake(input->width,input->height);
+            layer.drawableSize = CGSizeMake(width,height);
                         
             bool isInit = metal->init([queue device],width,height,FileManager::resource(IDENTIFIER,METALLIB));
             if(isInit) {
@@ -404,14 +403,15 @@ static PF_Err Render(PF_InData *in_data, PF_OutData *out_data, PF_ParamDef *para
                         unsigned char r = (p>>8)&0xFF;
                         unsigned char g = (p>>16)&0xFF;
                         unsigned char b = (p>>24)&0xFF;
-                        texture[i*dstRow+j] = a<<24|b<<16|g<<8|r;
+                        texture[i*width+j] = a<<24|b<<16|g<<8|r;
                     }
                 }
                 
                 [metal->texture() replaceRegion:MTLRegionMake2D(0,0,width,height) mipmapLevel:0 withBytes:texture bytesPerRow:width<<2];
                 metal->update(layer,queue);
                 [metal->drawableTexture() getBytes:buffer bytesPerRow:width<<2 fromRegion:MTLRegionMake2D(0,0,width,height) mipmapLevel:0];
-                                
+                            
+                
                 for(int i=0; i<height; i++) {
                     for(int j=0; j<width; j++) {
                         unsigned int p = buffer[i*width+j];
